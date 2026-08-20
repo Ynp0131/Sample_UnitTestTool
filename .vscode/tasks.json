@@ -1,0 +1,51 @@
+﻿{
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "C++ MVCアプリのビルド",
+			"command": "C:\\Strawberry\\c\\bin\\g++.exe",
+			"args": [
+				"-fdiagnostics-color=always",
+				"-std=c++17",
+				"-g",
+				"-static",
+				"-static-libgcc",
+				"-static-libstdc++",
+                "-mwindows",
+				"${workspaceFolder}\\main.cpp",
+				"${workspaceFolder}\\MainWindow.cpp",
+				"${workspaceFolder}\\AppController.cpp",
+                "-lwinhttp",
+				"-o",
+				"${workspaceFolder}\\mvc_app.exe"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "デバッガーによって生成されたタスク。"
+		},
+		{
+			"label": "noop",
+			"type": "shell",
+			"command": "echo skip"
+		},
+		{
+			"label": "noop2",
+			"type": "shell",
+			"command": "echo preparing rewrite"
+		},
+		{
+			"label": "noop3",
+			"type": "shell",
+			"command": "echo continue"
+		}
+	],
+	"version": "2.0.0"
+}
