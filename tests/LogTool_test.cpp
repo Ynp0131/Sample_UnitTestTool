@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <filesystem>
+#include <fstream>
 #include "ToolModels.h"
 
 namespace fs = std::filesystem;
@@ -25,7 +26,14 @@ protected:
     }
 };
 
-// Case No.1
+namespace {
+bool endsWith(const std::string& text, const std::string& suffix) {
+    return text.size() >= suffix.size() &&
+        text.compare(text.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+}
+
+// TC-L01
 TEST_F(LogToolTest, AddLogAppendsTimestampedMessage) {
     LogTool tool;
     tool.addLog("message");
@@ -35,21 +43,14 @@ TEST_F(LogToolTest, AddLogAppendsTimestampedMessage) {
     EXPECT_EQ(tool.getAllLogs()[0].front(), '[');
 }
 
-// Case No.2
+// TC-L02
 TEST_F(LogToolTest, AddLogIgnoresEmptyMessage) {
     LogTool tool;
     tool.addLog("");
     EXPECT_EQ(tool.getAllLogs().size(), 0u);
 }
 
-namespace {
-bool endsWith(const std::string& text, const std::string& suffix) {
-    return text.size() >= suffix.size() &&
-        text.compare(text.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
-}
-
-// Case No.3
+// TC-L03
 TEST_F(LogToolTest, AddLogTrimsOldestEntryBeyondMaxOf200) {
     LogTool tool;
     for (int i = 0; i < 200; ++i) {
@@ -66,20 +67,54 @@ TEST_F(LogToolTest, AddLogTrimsOldestEntryBeyondMaxOf200) {
     EXPECT_TRUE(endsWith(tool.getAllLogs().back(), "entry 200"));
 }
 
-// Case No.4
-TEST_F(LogToolTest, RemoveLogDeletesEntryAtValidIndex) {
+// TC-L04
+TEST_F(LogToolTest, AddLogKeepsAllEntriesAtExactlyMaxOf200) {
     LogTool tool;
-    tool.addLog("first");
-    tool.addLog("second");
+    for (int i = 0; i < 200; ++i) {
+        tool.addLog("entry " + std::to_string(i));
+    }
 
-    EXPECT_TRUE(tool.removeLog(0));
-    ASSERT_EQ(tool.getAllLogs().size(), 1u);
-    EXPECT_NE(tool.getAllLogs()[0].find("second"), std::string::npos);
+    ASSERT_EQ(tool.getAllLogs().size(), 200u);
+    EXPECT_TRUE(endsWith(tool.getAllLogs().front(), "entry 0"));
+    EXPECT_TRUE(endsWith(tool.getAllLogs().back(), "entry 199"));
 }
 
-// Case No.5
-TEST_F(LogToolTest, RemoveLogReturnsFalseWhenIndexOutOfRange) {
+// TC-L05
+TEST_F(LogToolTest, RemoveLogSucceedsAtLastValidIndex) {
     LogTool tool;
     tool.addLog("only entry");
-    EXPECT_FALSE(tool.removeLog(5));
+    EXPECT_TRUE(tool.removeLog(0));
+}
+
+// TC-L06
+TEST_F(LogToolTest, RemoveLogFailsJustPastLastValidIndex) {
+    LogTool tool;
+    tool.addLog("only entry");
+    EXPECT_FALSE(tool.removeLog(1));
+}
+
+// TC-L07
+TEST_F(LogToolTest, RoundTripsSpecialCharactersThroughJsonPersistence) {
+    const std::string specialText = "quote\" backslash\\ newline\n tab\t";
+    {
+        LogTool tool;
+        tool.addLog(specialText);
+    }
+
+    // 別インスタンスで再構築し、logs.jsonからの再読込を強制する
+    LogTool reloaded;
+    ASSERT_EQ(reloaded.getAllLogs().size(), 1u);
+    EXPECT_NE(reloaded.getAllLogs()[0].find(specialText), std::string::npos);
+}
+
+// TC-L08
+TEST_F(LogToolTest, RejectsFileWithUnrecognizedEscapeSequence) {
+    // \z はLogTool内部のreadJsonStringが認識しないエスケープ文字。
+    {
+        std::ofstream file("logs.json", std::ios::binary | std::ios::trunc);
+        file << "[\"ab\\zcd\"]";
+    }
+
+    LogTool tool;
+    EXPECT_EQ(tool.getAllLogs().size(), 0u);
 }
