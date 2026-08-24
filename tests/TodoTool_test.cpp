@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <filesystem>
+#include <fstream>
 #include "ToolModels.h"
 
 namespace fs = std::filesystem;
@@ -102,4 +103,19 @@ TEST_F(TodoToolTest, UpdateTodoAppliesNewTextWhenValid) {
 TEST_F(TodoToolTest, GetTodosReturnsNullptrForMissingKey) {
     TodoTool tool;
     EXPECT_EQ(tool.getTodos(42), nullptr);
+}
+
+// Case No.11 (異常系/例外経路分析: todos.json内に未知のエスケープシーケンスがある場合)
+// MemoTool・LogToolの同等ロジック(ToolModels.h:283, :507)は未知のエスケープで
+// 読込を中断する(false)。TodoTool側もその方針に揃えるべきであり、
+// 途中まで組み立てた不完全な文字列("abc")を確定させてはならない。
+TEST_F(TodoToolTest, LoadFromJsonDiscardsPartialEntryWhenEscapeSequenceIsInvalid) {
+    {
+        std::ofstream file("todos.json", std::ios::binary | std::ios::trunc);
+        file << "{\n  \"0\": [\"abc\\qdef\"]\n}\n";
+    }
+
+    TodoTool tool;
+
+    EXPECT_EQ(tool.getTodos(0), nullptr);
 }

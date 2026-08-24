@@ -55,7 +55,7 @@ private:
                     case 'n': value += '\n'; break;
                     case 'r': value += '\r'; break;
                     case 't': value += '\t'; break;
-                    default: return true;
+                    default: return false;
                 }
             } else {
                 value += character;
