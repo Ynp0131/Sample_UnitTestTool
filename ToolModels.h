@@ -1,10 +1,12 @@
 ﻿#pragma once
+#define NOMINMAX
 
 #include "Tool.h"
 #include "LocalAi.h"
 #include <algorithm>
 #include <cctype>
 #include <chrono>
+#include <cwctype>
 #include <filesystem>
 #include <fstream>
 #include <functional>
