@@ -1,6 +1,6 @@
 # 単体テスト結果レポート: TodoTool / LogTool (ToolModels.h)
 
-> 生成日時: 2026-08-24 / 対象ブランチ・入力形式: GitHub `false1`ブランチ (`https://github.com/Ynp0131/Sample_UnitTestTool.git`)。修正はfeatureブランチ`fix/l58-readjsonstring`(`false1`から分岐)上で適用し、`main`へのPRを作成した。
+> 生成日時: 2026-08-24 / 対象ブランチ・入力形式: GitHub `false1`ブランチ (`https://github.com/Ynp0131/Sample_UnitTestTool.git`)。修正はfeatureブランチ`fix/l58-readjsonstring`(`false1`から分岐)上で適用し、`false1`へのPRを作成した。
 
 ## 1. テスト箇所
 
